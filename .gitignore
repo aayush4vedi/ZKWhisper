@@ -1,0 +1,39 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore node_modules directory in subdirectories
+**/node_modules/
+
+# Ignore npm's cache directory
+.npm
+
+# Ignore yarn's cache directory
+.yarn
+
+# Ignore compiled and minified files
+dist/
+build/
+out/
+*.bundle.js
+*.bundle.js.map
+*.min.js
+*.min.js.map
+
+# Ignore log files and other generated files
+*.log
+*.log.*
+*.pid
+*.seed
+*.pid.lock
+
+# Ignore environment-specific files
+*.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+.vscode/
+.idea/
+package-lock.json
+yarn.lock
