@@ -3,7 +3,9 @@ import React from "react"
 import { useTheme } from "next-themes"
 import ThemeToggleButton from "./common/ThemeToggleButton"
 import { MdOutlineLightMode } from "react-icons/md"
-import { RxHamburgerMenu } from "react-icons/rx"
+import { IoWalletOutline } from "react-icons/io5"
+
+import { ConnectButton } from "@rainbow-me/rainbowkit"
 
 const style = {
     wrapper: `sticky w-full top-0 left-0 z-40 flex items-center justify-between p-4`,
@@ -22,13 +24,16 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
     return (
         <header className="flex items-center justify-between px-10 py-2">
             <div className="flex items-center">
-                <RxHamburgerMenu size={25} />
+                <IoWalletOutline size={25} />
             </div>
             <div className="flex flex-col items-center">
                 <h1 className="text-2xl font-bold mb-1 text-gray-500">{title}</h1>
                 <p className="text-sm">{subtitle}</p>
             </div>
-            <ThemeToggleButton theme={theme} toggleTheme={toggleTheme} />
+            <div className="flex items-center">
+                <ConnectButton />
+                <ThemeToggleButton theme={theme} toggleTheme={toggleTheme} />
+            </div>
         </header>
     )
 }

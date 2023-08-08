@@ -15,7 +15,7 @@ const Home: NextPage = () => {
         <div className={style.wrapper}>
             {/* <Script src="/js/snarkjs.min.js" /> */}
             <Head>
-                <title> Zeus</title>
+                <title> ZKW</title>
                 <meta content="Zero Knowledge Wallet for User Sovereignty" name="description" />
                 <link href="/favicon.ico" rel="icon" />
                 <link
@@ -32,8 +32,8 @@ const Home: NextPage = () => {
 
             <div>
                 <Header
-                    title="ZEUS"
-                    subtitle="Zero Knowledge Social Recovery Wallet for User Sovereignty"
+                    title="ZKWhisper"
+                    subtitle="Truely Zero Knowledge Social Recovery Wallet for User Sovereignty"
                 />
                 <hr className="py-1" />
                 {/* //TODO: change the below section as per global state */}
