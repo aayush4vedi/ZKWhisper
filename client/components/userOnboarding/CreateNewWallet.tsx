@@ -17,7 +17,7 @@ import { BN256ToBinUtil, GenerateRandomBinaryArray, StringTo256Binary, BNToDecim
 
 // ========================================================== deployment details
 import ZKWHISPER_ABI from "../../constants/zkwhisper.json"
-const CONTRACT_ADDRESS = "0x43ca3d2c94be00692d207c6a1e60d8b325c6f12f"
+import ZKWHISPER_ADDRESS from '../../constants/addressMappings';
 const zkWhisperInterface = new Interface(ZKWHISPER_ABI)
 
 const keccak256 = require("js-sha3").keccak256
@@ -33,10 +33,10 @@ const CreateNewWallet = () => {
     const [walletAddress, setWalletAddress] = useState("")
 
     const [nullifier, setNullifier] = useState("") // to be sent to contract.signup
-    const [nullifierHash, setNullifierHash] = useState("") 
-    const [commitment, setCommitment] = useState("") 
-    const [commitmentHash, setCommitmentHash] = useState("") 
-    const [idProof, setIdProof] = useState("") 
+    const [nullifierHash, setNullifierHash] = useState("")
+    const [commitment, setCommitment] = useState("")
+    const [commitmentHash, setCommitmentHash] = useState(null)
+    const [idProof, setIdProof] = useState("")
     // const debouncedTokenId = useDebounce(commitmentHash, 500)
 
     /* 
@@ -97,65 +97,6 @@ const CreateNewWallet = () => {
     ==========================================
     */
 
-    const { metamaskWalletAddress } = useAccount()
-
-    /**
-     * this function creates a wallet address from a mnemonic
-     */
-    const createAddress = (mnemonic: string) => {
-        // const path = `m/44'/60'/0'/0/${i}`
-        const wallet = ethers.Wallet.fromMnemonic(mnemonic)
-        console.log("wallet.address:", wallet.address)
-        console.log("wallet.privKey:", wallet.privateKey)
-        console.log("wallet.pubKey:", wallet.publicKey)
-        return wallet.address
-    }
-
-    /**
-     * create account function
-     */
-    const createAccount = async () => {
-        // generate i_comm, i_nulli : random 32 byets
-        const i_comm = GenerateRandomBinaryArray()
-        setCommitment(i_comm)
-        const i_nulli = GenerateRandomBinaryArray()
-        setNullifier(i_nulli)
-
-        // create hashes of i_comm => i_comm_hash, i_nulli => i_nulli_hash using circuit
-        const input = {
-            secret: i_comm,
-            nullifier: i_nulli,
-        }
-
-        console.log("input : ", input)
-
-        let depositWC: any = await fetch("/signup.wasm")
-            .then((res) => res.arrayBuffer())
-            .then((buff) => Buffer.from(buff))
-            .then((res) => wc(res))
-
-        const r = await depositWC.calculateWitness(input, 0)
-
-        const i_comm_hash = r[1]
-        const i_nulli_hash = r[2]
-
-        console.log("i_comm_hash : ", i_comm_hash)
-        console.log("i_nulli_hash : ", i_nulli_hash)
-
-        setCommitmentHash(i_comm_hash)
-        setNullifierHash(i_nulli_hash)
-
-        console.log(`------------------ going to call the contract`)
-        const writeToContract = await write()
-        console.log(`------------------ contract called`)
-        if (data && data?.hash) {
-            console.log(`------------------ setSignUpEventTxAddress called`)
-            setSignUpEventTxAddress(data.hash)
-        }
-
-        return true
-    }
-
     // generate random bytes of size 32 using ethers
 
     // unused 5 functions. for POC
@@ -195,11 +136,28 @@ const CreateNewWallet = () => {
     //     setMnemonic(mnemonic)
     // }
 
-    // =============================================================
-    // ================= smart contract functions
-    // =============================================================
-    const { config } = usePrepareContractWrite({
-        address: CONTRACT_ADDRESS,
+    const { metamaskWalletAddress } = useAccount()
+
+    /**
+     * this function creates a wallet address from a mnemonic
+     */
+    const createAddress = (mnemonic: string) => {
+        // const path = `m/44'/60'/0'/0/${i}`
+        const wallet = ethers.Wallet.fromMnemonic(mnemonic)
+        console.log("wallet.address:", wallet.address)
+        console.log("wallet.privKey:", wallet.privateKey)
+        console.log("wallet.pubKey:", wallet.publicKey)
+        return wallet.address
+    }
+
+    const [createAccBtnClicked, setCreateAccBtnClicked] = useState(false)
+
+    const {
+        config,
+        error: prepareError,
+        isError: isPrepareError,
+    } = usePrepareContractWrite({
+        address: ZKWHISPER_ADDRESS,
         abi: ZKWHISPER_ABI,
         functionName: "signupFn",
         args: [commitmentHash],
@@ -212,6 +170,58 @@ const CreateNewWallet = () => {
     const { isLoading, isSuccess } = useWaitForTransaction({
         hash: data?.hash,
     })
+    /**
+     * create account function
+     */
+    const createAccount = async () => {
+        // generate i_comm, i_nulli : random 32 byets
+        const i_comm = BigNumber.from(ethers.utils.randomBytes(32)).toString()
+        setCommitment(i_comm)
+        const i_nulli = BigNumber.from(ethers.utils.randomBytes(32)).toString()
+        setNullifier(i_nulli)
+
+        // create hashes of i_comm => i_comm_hash, i_nulli => i_nulli_hash using circuit
+        const input = {
+            secret: BN256ToBinUtil(i_comm).split(""),
+            nullifier: BN256ToBinUtil(i_nulli).split(""),
+        }
+
+        console.log("input : ", input)
+
+        let depositWC: any = await fetch("/signup.wasm")
+            .then((res) => res.arrayBuffer())
+            .then((buff) => Buffer.from(buff))
+            .then((res) => wc(res))
+
+        const r = await depositWC.calculateWitness(input, 0)
+
+        const i_comm_hash = r[1]
+        const i_nulli_hash = r[2]
+
+        setCommitmentHash(i_comm_hash)
+        setNullifierHash(i_nulli_hash)
+        setCreateAccBtnClicked(true)
+
+        console.log("i_comm_hash : ", i_comm_hash)
+        console.log("i_nulli_hash : ", i_nulli_hash)
+
+        // console.log(
+        //         `------------------ going to call the contract :: commitmenHash: ${commitmentHash}`
+        //     )
+        //     write?.()
+        //     console.log(`------------------ contract called`)
+        // if (data && data?.hash) {
+        //     console.log(`------------------ setSignUpEventTxAddress called`)
+        //     setSignUpEventTxAddress(data.hash)
+        // }
+
+        // return isSuccess
+        return true
+    }
+
+    // =============================================================
+    // ================= smart contract functions
+    // =============================================================
 
     const [signUpEventTxAddress, setSignUpEventTxAddress] = useState("")
 
@@ -222,6 +232,56 @@ const CreateNewWallet = () => {
             fetchSignUpEvent(data.hash)
         }
     }, [data])
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         if (commitmentHash) {
+    //             console.log(
+    //                 `------------------ going to call the contract :: commitmentHash: ${commitmentHash}`
+    //             )
+
+    //             // Await the asynchronous function
+    //             await write?.()
+
+    //             console.log(`------------------ contract called`)
+
+    //             if (data && data?.hash) {
+    //                 console.log(`------------------ setSignUpEventTxAddress called`)
+    //                 setSignUpEventTxAddress(data.hash)
+    //             }
+    //         }
+    //     }
+
+    //     fetchData()
+    // }, [commitmentHash, createAccBtnClicked])
+
+    // useEffect(() => {
+    //     console.log("....................... updated commitmentHash: ", commitmentHash , ' write = ', write)
+    //     if (commitmentHash != null) {
+    //         console.log(`calling write()...  isSuccess: ${isSuccess} , isLoading: ${isLoading}`)
+    //         callWrite()
+    //          console.log(`called write()...  isSuccess: ${isSuccess} , isLoading: ${isLoading}`)
+
+    //         if (data && data?.hash) {
+    //             console.log(`------------------ setSignUpEventTxAddress called`)
+    //             setSignUpEventTxAddress(data.hash)
+    //         }
+    //     } else {
+    //         console.log("......commitmentHash is null")
+    //     }
+    // }, [commitmentHash])
+
+    // const callWrite = async () => {
+    //     try {
+    //         console.log(`calling callWrite()...  isSuccess: ${isSuccess} , isLoading: ${isLoading}, write: ${write}`)
+    //         await write?.()
+    //         console.log(
+    //             `called callWrite()...  isSuccess: ${isSuccess} , isLoading: ${isLoading}, write: ${write}`
+    //         )
+    //     } catch (error) {
+    //         console.log("error in calling write: ", error)
+    //     }
+    // }
 
     // fetching SignupEvent from tx
     const fetchSignUpEvent = async (txHash: string) => {
@@ -246,9 +306,9 @@ const CreateNewWallet = () => {
             menmonic: mnemonic,
             password: password1,
             nullifier: nullifier,
-            nullifierHash: BNToDecimal(nullifierHash),
+            nullifierHash: `${nullifierHash}`,
             commitment: commitment,
-            commitmentHash: BNToDecimal(commitmentHash),
+            commitmentHash: `${commitmentHash}`,
             accountAddress: walletAddress,
             newRoot: BNToDecimal(root),
             hashPairings: BNToDecimal(hashPairings),
@@ -257,17 +317,6 @@ const CreateNewWallet = () => {
         setIdProof(_i_proof)
         console.log("===============>i_proof : ", _i_proof)
     }
-    // const unwatch = watchContractEvent(
-    //     {
-    //         address: `"${signUpEventTxAddress}"`,
-    //         abi: ZKWHISPER_ABI,
-    //         eventName: "SignupEvent",
-    //     },
-    //     (log: any) => {
-    //         console.log("===========> Emitted event: ")
-    //         console.log(log)
-    //     }
-    // )
 
     // download id_proof.json
 
@@ -275,11 +324,8 @@ const CreateNewWallet = () => {
         console.log("---------------------===============>idProof : ", idProof)
         const jsonString = JSON.stringify(idProof, null, 2)
 
-        // Copy JSON to clipboard
-        // navigator.clipboard.writeText(jsonString)
-
-        // Download JSON as a JSON file
-        const blob = new Blob([jsonString], { type: "application/json" })
+        const hexString = Buffer.from(jsonString, "utf-8").toString("hex")
+        const blob = new Blob([hexString], { type: "application/octet-stream" })
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
@@ -290,7 +336,7 @@ const CreateNewWallet = () => {
 
     return (
         <div className="flex flex-col items-center justify-center py-5">
-            {walletAddress && (
+            {/* {walletAddress && (
                 <div className="flex flex-col items-center justify-center py-5">
                     <h4 className="text-2xl font-bold mb-10">
                         Metamask Wallet Address: {metamaskWalletAddress}
@@ -312,18 +358,42 @@ const CreateNewWallet = () => {
                         </div>
                     </div>
                 </div>
-            )}
-            {isLoading && <p>Waiting for transaction to go by...</p>}
+            )} */}
+            {/* {isLoading && <p>Waiting for transaction to go by...</p>} */}
+            {/* {(isPrepareError || isError) && <div>Error: {(prepareError || error)?.message}</div>} */}
             {isSuccess && (
-
-                <div className="flex flex-col items-center justify-center py-5" >
-                    <p>{`ZKWhisper Wallet Address:  ${signUpEventTxAddress}`}</p>
-                    <button 
-                    className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
-                    onClick={downloadJson}>Download Your Wallet Identity Proof</button>
+                <div className="flex flex-col items-center justify-center py-5">
+                    <div className="flex flex-col items-center justify-center py-5">
+                        <h4 className="text-2xl font-bold mb-10">
+                            Metamask Wallet Address: {metamaskWalletAddress}
+                        </h4>
+                        <h2 className="text-4xl font-bold mb-10">Wallet Created!</h2>
+                        <p className="text-2xl font-bold mb-10">
+                            Please save your mnemonic and password in a safe place.
+                        </p>
+                        <div className="flex flex-col items-center mt-4">
+                            <p className="font-bold">Wallet Address:</p>
+                            <div className="flex items-center mt-4">
+                                <p className="font-mono">{walletAddress}</p>
+                                <button
+                                    onClick={() => copyToClipboard(walletAddress)}
+                                    className="flex items-center"
+                                >
+                                    <FiCopy className="m-2" /> {copied ? "Copied!" : "Copy"}{" "}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p>{`ZKWhisper Wallet Address:  ${walletAddress}`}</p>
+                    <button
+                        className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                        onClick={downloadJson}
+                    >
+                        Download Your Wallet Identity Proof
+                    </button>
                 </div>
             )}
-            {!walletAddress && (
+            {!isSuccess && (
                 <div>
                     <h2 className="text-4xl font-bold mb-10">Create New ZKWhisper Wallet</h2>
                     <div className="mb-4 w-full">
@@ -380,8 +450,16 @@ const CreateNewWallet = () => {
                     <button
                         className="bg-amber-400  px-4 py-2 mt-10 rounded w-full"
                         onClick={handleSubmit}
+                        // disabled={!write}
                     >
-                        Submit
+                        Generate Proof
+                    </button>
+                    <button
+                        className="button rounded-lg font-bold bg-black text-white  px-4 py-2 mt-10 w-full"
+                        onClick={() => write?.()}
+                        disabled={!write}
+                    >
+                        Call SmartContract
                     </button>
                 </div>
             )}

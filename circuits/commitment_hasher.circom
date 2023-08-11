@@ -1,7 +1,8 @@
 // circuit using Pedersen hash of two inputs
 pragma circom 2.0.0;
 
-include "./node_modules/circomlib/circuits/pedersen.circom";
+// include "./node_modules/circomlib/circuits/pedersen.circom";
+include "./utils/pedersen.circom";
 
 // commitment = commitment + nullifier 
 template CommitmentHasher() {
@@ -19,6 +20,8 @@ template CommitmentHasher() {
         nHasher.in[i] <== nullifier[i];
     }
 
-    commitment <== cHasher.out[0];
-    nullifierHash <== nHasher.out[0];
+    // commitment <== cHasher.out[0];
+    // nullifierHash <== nHasher.out[0];
+    commitment <== cHasher.o;
+    nullifierHash <== nHasher.o;
 }

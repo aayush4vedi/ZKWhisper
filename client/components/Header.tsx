@@ -1,6 +1,8 @@
 import React from "react"
 
 import { useTheme } from "next-themes"
+import Link from 'next/link';
+
 import ThemeToggleButton from "./common/ThemeToggleButton"
 import { MdOutlineLightMode } from "react-icons/md"
 import { IoWalletOutline } from "react-icons/io5"
@@ -24,7 +26,9 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
     return (
         <header className="flex items-center justify-between px-10 py-2">
             <div className="flex items-center">
-                <IoWalletOutline size={25} />
+                <Link href="/">
+                    <IoWalletOutline size={25} />
+                </Link>
             </div>
             <div className="flex flex-col items-center">
                 <h1 className="text-2xl font-bold mb-1 text-gray-500">{title}</h1>

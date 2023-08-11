@@ -13,7 +13,7 @@ const style = {
 const Home: NextPage = () => {
     return (
         <div className={style.wrapper}>
-            {/* <Script src="/js/snarkjs.min.js" /> */}
+            <Script src="/js/snarkjs.min.js" />
             <Head>
                 <title> ZKW</title>
                 <meta content="Zero Knowledge Wallet for User Sovereignty" name="description" />
