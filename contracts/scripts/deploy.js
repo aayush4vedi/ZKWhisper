@@ -54,9 +54,10 @@ async function main() {
 
     // deploy ZKWhisper
     // factory = await hre.ethers.getContractFactory("ZKWhisper")
-    const zkwhisper = await hre.ethers.deployContract("ZKWhisper", [mimc.target, verifier.target])
+    // const zkwhisper = await hre.ethers.deployContract("ZKWhisper", [mimc.target, verifier.target])
+    const zkwhisper = await hre.ethers.deployContract("ZKWhisper2", [mimc.target, verifier.target])
     await zkwhisper.waitForDeployment()
-    console.log(`Deployed ZKWhisper at ${zkwhisper.target}`)
+    console.log(`Deployed ZKWhisper2 at ${zkwhisper.target}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

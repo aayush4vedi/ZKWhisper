@@ -1,3 +1,14 @@
-export default function Tmp() {
-  return <div>Tmp Page</div>;
+import type { NextPage } from "next"
+
+
+import SocialRecoverySetup from "../components/socialRecovery/SocialRecoverySetup"
+
+const TmpPage: NextPage = () => {
+    return (
+        <div>
+            <SocialRecoverySetup />
+        </div>
+    )
 }
+
+export default TmpPage

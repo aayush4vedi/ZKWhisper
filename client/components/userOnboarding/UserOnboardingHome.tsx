@@ -73,7 +73,8 @@ const UserOnboardingHome: React.FC = () => {
           {currentOnboardingComponent ? (
               <div className="flex flex-col items-center justify-between px-10 py-2">
                   {renderOnboardingComponent()}
-                  <div className="flex flex-col items-center fixed bottom-10 left-0 w-full cursor-pointer">
+                  {/* <div className="flex flex-col items-center fixed bottom-10 left-0 w-full cursor-pointer"> */}
+                  <div className="flex flex-col items-center w-full cursor-pointer">
                       <BiArrowBack size={25} onClick={handleBackButtonClick} />
                       <button onClick={handleBackButtonClick}>Go Back</button>
                       {isConnected && <p className="font-mono">Connected to {address}</p>}

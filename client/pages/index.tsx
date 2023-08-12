@@ -4,6 +4,7 @@ import Script from "next/script"
 import Header from "../components/Header"
 import UserOnboardingHome from "../components/userOnboarding/UserOnboardingHome"
 import CreateNewWallet from "../components/userOnboarding/CreateNewWallet"
+import SocialRecoverySetup from "@/components/socialRecovery/SocialRecoverySetup"
 
 const style = {
     wrapper: `h-100vh w-100vw select-none flex flex-col`,
@@ -37,7 +38,7 @@ const Home: NextPage = () => {
                 />
                 <hr className="py-1" />
                 {/* //TODO: change the below section as per global state */}
-                <UserOnboardingHome/>
+                <UserOnboardingHome />
             </div>
         </div>
     )

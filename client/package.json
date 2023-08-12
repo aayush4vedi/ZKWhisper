@@ -30,6 +30,7 @@
         "ethers": "5.0.0",
         "jotai": "^2.2.3",
         "js-sha3": "^0.8.0",
+        "jszip": "^3.10.1",
         "next-themes": "^0.2.1",
         "react-icons": "^4.10.1",
         "snarkjs": "^0.7.0",

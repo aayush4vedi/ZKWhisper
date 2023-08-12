@@ -1,211 +1,365 @@
 [
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_hasher",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_verifier",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_hasher",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_verifier",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "nullifierHash",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "bool",
-          "name": "verifyOK",
-          "type": "bool"
-        }
-      ],
-      "name": "LoginEvent",
-      "type": "event"
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "nullifierHash",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "verifyOK",
+                "type": "bool"
+            }
+        ],
+        "name": "ExecuteRecoveryEvent",
+        "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "root",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256[10]",
-          "name": "hashPairings",
-          "type": "uint256[10]"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint8[10]",
-          "name": "hashDirections",
-          "type": "uint8[10]"
-        }
-      ],
-      "name": "SignupEvent",
-      "type": "event"
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "nullifierHash",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "verifyOK",
+                "type": "bool"
+            }
+        ],
+        "name": "LoginEvent",
+        "type": "event"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "commitments",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "root",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[10]",
+                "name": "hashPairings",
+                "type": "uint256[10]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint8[10]",
+                "name": "hashDirections",
+                "type": "uint8[10]"
+            }
+        ],
+        "name": "RegisterRecoveryEvent",
+        "type": "event"
     },
     {
-      "inputs": [],
-      "name": "denomination",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "root",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256[10]",
+                "name": "hashPairings",
+                "type": "uint256[10]"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint8[10]",
+                "name": "hashDirections",
+                "type": "uint8[10]"
+            }
+        ],
+        "name": "SignupEvent",
+        "type": "event"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256[2]",
-          "name": "a",
-          "type": "uint256[2]"
-        },
-        {
-          "internalType": "uint256[2][2]",
-          "name": "b",
-          "type": "uint256[2][2]"
-        },
-        {
-          "internalType": "uint256[2]",
-          "name": "c",
-          "type": "uint256[2]"
-        },
-        {
-          "internalType": "uint256[2]",
-          "name": "input",
-          "type": "uint256[2]"
-        }
-      ],
-      "name": "loginFn",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "commitmentsRecovery",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
-      "inputs": [],
-      "name": "nextLeafIdx",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "commitmentsUser",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "nullifierHashes",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+        "inputs": [
+            {
+                "internalType": "uint256[2]",
+                "name": "a",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[2][2]",
+                "name": "b",
+                "type": "uint256[2][2]"
+            },
+            {
+                "internalType": "uint256[2]",
+                "name": "c",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[2]",
+                "name": "input",
+                "type": "uint256[2]"
+            }
+        ],
+        "name": "executeRecoveryFn",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "roots",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+        "inputs": [
+            {
+                "internalType": "uint256[2]",
+                "name": "a",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[2][2]",
+                "name": "b",
+                "type": "uint256[2][2]"
+            },
+            {
+                "internalType": "uint256[2]",
+                "name": "c",
+                "type": "uint256[2]"
+            },
+            {
+                "internalType": "uint256[2]",
+                "name": "input",
+                "type": "uint256[2]"
+            }
+        ],
+        "name": "loginFn",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_commitment",
-          "type": "uint256"
-        }
-      ],
-      "name": "signupFn",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "root",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
+        "inputs": [],
+        "name": "nextLeafIdxRecovery",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
-      "inputs": [],
-      "name": "treeLevel",
-      "outputs": [
-        {
-          "internalType": "uint8",
-          "name": "",
-          "type": "uint8"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
+        "inputs": [],
+        "name": "nextLeafIdxUser",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "nullifierHashesRecovery",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "nullifierHashesUser",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_commitment",
+                "type": "uint256"
+            }
+        ],
+        "name": "registerRecoveryFn",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "root",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "rootsRecovery",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "rootsUser",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_commitment",
+                "type": "uint256"
+            }
+        ],
+        "name": "signupFn",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "root",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "treeLevel",
+        "outputs": [
+            {
+                "internalType": "uint8",
+                "name": "",
+                "type": "uint8"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
-  ]
+]
