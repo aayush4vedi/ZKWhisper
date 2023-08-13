@@ -1,0 +1,33 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ZKWhisper
+    network: goerli
+    source:
+      address: "0xFdBD9C6f07C8EB11A37ef3E6A51010a8b5000606"
+      abi: ZKWhisper
+      startBlock: 8475872
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - LoginAttempted
+        - SignUpAttempted
+        - RecoverySubmitted
+        - RecoveryExecuted
+      abis:
+        - name: ZKWhisper
+          file: ./abis/ZKWhisper.json
+      eventHandlers:
+        - event: ExecuteRecoveryEvent(indexed address,indexed address,indexed uint256,uint256,uint256,uint256,bytes32)
+          handler: handleExecuteRecoveryEvent
+        - event: LoginEvent(indexed address,indexed address,indexed uint256,uint256,uint256,bytes32)
+          handler: handleLoginEvent
+        - event: RegisterRecoveryEvent(indexed address,indexed address,indexed uint256,uint256,uint256,uint256,bytes32)
+          handler: handleRegisterRecoveryEvent
+        - event: SignUpEvent(indexed address,indexed address,indexed uint256,uint256,uint256,bytes32)
+          handler: handleSignUpEvent
+      file: ./src/zk-whisper.ts

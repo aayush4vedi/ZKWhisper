@@ -1,0 +1,8 @@
+{
+  "goerli": {
+    "ZKWhisper": {
+      "address": "0xFdBD9C6f07C8EB11A37ef3E6A51010a8b5000606",
+      "startBlock": 8475872
+    }
+  }
+}
