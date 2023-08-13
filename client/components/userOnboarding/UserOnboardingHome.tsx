@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { BiArrowBack } from "react-icons/bi";
+import { useRouter } from "next/router"
 
 import {
     useAccount
@@ -10,6 +11,10 @@ import CreateNewWallet from "./CreateNewWallet";
 import OnboardExistingWallet from "./OnboardExistingWallet";
 import RecoverWallet from "./RecoverWallet";
 
+import { useAtom } from "jotai"
+import { zkWhisperAccountAddressAtom } from "../../state/atom"
+
+
 enum OnboardingComponentEnum {
   Create = "Create",
   Onboard = "Onboard",
@@ -18,6 +23,12 @@ enum OnboardingComponentEnum {
 }
 
 const UserOnboardingHome: React.FC = () => {
+
+   const router = useRouter()
+
+  const [zkWhisperAccountAddress, setZkWhisperAccountAddress] = useAtom(
+        zkWhisperAccountAddressAtom
+    )
 
   const { address, isConnected } = useAccount() //metamask address
 
@@ -70,19 +81,39 @@ const UserOnboardingHome: React.FC = () => {
 
   return (
       <div>
-          {currentOnboardingComponent ? (
-              <div className="flex flex-col items-center justify-between px-10 py-2">
-                  {renderOnboardingComponent()}
-                  {/* <div className="flex flex-col items-center fixed bottom-10 left-0 w-full cursor-pointer"> */}
-                  <div className="flex flex-col items-center w-full cursor-pointer">
-                      <BiArrowBack size={25} onClick={handleBackButtonClick} />
-                      <button onClick={handleBackButtonClick}>Go Back</button>
-                      {isConnected && <p className="font-mono">Connected to {address}</p>}
+          <div className="flex flex-col items-center justify-between px-10 py-2">
+              {/* {zkWhisperAccountAddress && (
+                  <div className="flex flex-col items-center justify-between px-10 py-2">
+                      <button
+                          className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                          onClick={() => router.push("/recovery")}
+                      >
+                          Setup Wallet Recovery
+                      </button>
+                      <button
+                          className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                          onClick={() => router.push("/recovery")}
+                      >
+                          Transfer Funds to Your ZKWhisper Account
+                      </button>
+                      <p>Only you will hold the keys for this account!</p>
                   </div>
-              </div>
-          ) : (
-              renderOnboardingComponent()
-          )}
+              )} */}
+              {
+                  (currentOnboardingComponent ? (
+                      <div className="flex flex-col items-center justify-between px-10 py-2">
+                          {renderOnboardingComponent()}
+                          {/* <div className="flex flex-col items-center fixed bottom-10 left-0 w-full cursor-pointer"> */}
+                          <div className="flex flex-col items-center w-full cursor-pointer py-40">
+                              <BiArrowBack size={25} onClick={handleBackButtonClick} />
+                              <button onClick={handleBackButtonClick}>Home</button>
+                              {isConnected && <p className="font-mono">Connected to {address}</p>}
+                          </div>
+                      </div>
+                  ) : (
+                      renderOnboardingComponent()
+                  ))}
+          </div>
       </div>
   )
 };

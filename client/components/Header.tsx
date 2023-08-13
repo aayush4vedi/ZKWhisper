@@ -9,6 +9,9 @@ import { IoWalletOutline } from "react-icons/io5"
 
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 
+import { useAtom } from "jotai"
+import { zkWhisperAccountAddressAtom } from "../state/atom"
+
 const style = {
     wrapper: `sticky w-full top-0 left-0 z-40 flex items-center justify-between p-4`,
     wrapperSmooth: `sticky w-full top-0 left-0 z-40 text-white shadow-xl dark:text-gray-800 flex items-center justify-between p-4 backdrop-blur-sm  bg-gradient-to-tr from-rose-100 via-sky-100 to-white dark:bg-gradient-to-tr dark:from-black dark:to-black`,
@@ -23,6 +26,10 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
     const { theme, setTheme } = useTheme()
     const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark")
 
+    const [zkWhisperAccountAddress, setZkWhisperAccountAddress] = useAtom(
+        zkWhisperAccountAddressAtom
+    )
+
     return (
         <header className="flex items-center justify-between px-10 py-2">
             <div className="flex items-center">
@@ -33,6 +40,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
             <div className="flex flex-col items-center">
                 <h1 className="text-2xl font-bold mb-1 text-gray-500">{title}</h1>
                 <p className="text-sm">{subtitle}</p>
+                {zkWhisperAccountAddress && <p>Your ZKWallet Address: {zkWhisperAccountAddress}</p>}
             </div>
             <div className="flex items-center">
                 <ConnectButton />

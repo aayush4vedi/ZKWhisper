@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useRouter } from "next/router"
 import { Interface } from "@ethersproject/abi"
 
 import {
@@ -20,11 +21,23 @@ import {
     useWaitForTransaction,
 } from "wagmi"
 
+
+import { useAtom } from "jotai"
+
 import ZKWHISPER_ABI from "../../constants/zkwhisper.json"
 import ZKWHISPER_ADDRESS from "../../constants/addressMappings"
+import { zkWhisperAccountAddressAtom,zkWhisperAccountPrivKeyAtom } from "../../state/atom"
+
+
+import { utils } from "ethers"
+import { ethers } from "ethers"
+import { usePrepareSendTransaction, useSendTransaction } from "wagmi"
+
+
 const zkWhisperInterface = new Interface(ZKWHISPER_ABI)
 
 const OnboardExistingWallet = () => {
+    const router = useRouter()
     const { address } = useAccount()
 
     const [jsonData, setJsonData] = useState<any>(null)
@@ -40,6 +53,13 @@ const OnboardExistingWallet = () => {
     // result of VerifyOk from contract
     const [verifyOk, setVerifyOk] = useState<boolean>(false)
     const [loginAttemptFailed, setLoginAttemptFailed] = useState<boolean>(false)
+
+    const [zkWhisperAccountAddress, setZkWhisperAccountAddress] = useAtom(
+        zkWhisperAccountAddressAtom
+    )
+    const [zkWhisperAccountPrivKey, setZkWhisperAccountPrivKey] = useAtom(
+        zkWhisperAccountPrivKeyAtom
+    )
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -202,9 +222,22 @@ const OnboardExistingWallet = () => {
         console.log("===============>account : ", account)
         console.log("===============>nullifierHash : ", nullifierHash)
         console.log("===============>verifyOK : ", verifyOK)
+
+        if (verifyOK) {
+            setZkWhisperAccountAddress(jsonData.accountAddress)
+            setZkWhisperAccountPrivKey(jsonData.walletAddressPrivKey)
+        }
+
         setVerifyOk(verifyOK)
         setLoginAttemptFailed(false)
     }
+
+    //// ============================================================= transfer funds
+    const { config: transferEthConf } = usePrepareSendTransaction({
+        to: jsonData?.accountAddress,
+        value: ethers.utils.parseEther("0.01"),
+    })
+    const { sendTransaction } = useSendTransaction(transferEthConf)
 
     return (
         <div className="flex flex-col items-center justify-center py-5">
@@ -246,6 +279,18 @@ const OnboardExistingWallet = () => {
                         <p>
                             <strong>Your accountAddress:</strong> {jsonData?.accountAddress}
                         </p>
+                        <button
+                            className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                            onClick={() => router.push("/recovery")}
+                        >
+                            Setup Wallet Recovery
+                        </button>
+                        <button
+                            className="button rounded-lg font-bold bg-amber-400 border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                            onClick={() => sendTransaction?.()}
+                        >
+                            Transfer Funds to ZKWhisper Wallet
+                        </button>
                     </div>
                 )}
                 {!setLoginAttemptFailed && (

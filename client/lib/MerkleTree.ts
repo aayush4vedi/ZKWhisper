@@ -102,3 +102,56 @@ export class MerkleTree {
         return merkleRoot.eq(reconstructedRoot)
     }
 }
+
+export function calculateMerkleRootFromProofValues(
+    index: number,
+    share: Share,
+    hashPairings: BigNumber[],
+    hashDirections: number[]
+): BigNumber {
+    // reverse hashPairings and hashDirections
+    hashPairings = hashPairings.reverse()
+    hashDirections = hashDirections.reverse()
+
+    // Calculate the current hash
+    let currentHash = hashAShare(share)
+
+    // Iterate over hashPairings and hashDirections and update the current hash
+    for (let i = 0; i < hashPairings.length; i++) {
+        const siblingHash = hashPairings[i]
+        const direction = hashDirections[i]
+
+        if (direction === 0) {
+            const combinedBytes = utils.concat([currentHashBytes, utils.arrayify(siblingHash)])
+            currentHash = BigNumber.from(utils.keccak256(combinedBytes))
+        } else {
+            currentHash = utils.keccak256(
+                utils.solidityPack(["bytes32", "bytes32"], [siblingHash, currentHash])
+            )
+        }
+    }
+
+    return currentHash
+}
+
+
+// utils ================================
+
+function convertToShare(extractedShare: any): Share {
+    return {
+        share_x: BigNumber.from(extractedShare.share_x),
+        share_y: BigNumber.from(extractedShare.share_y),
+        index: extractedShare.index,
+    }
+}
+
+function hashAShare(share: Share): BigInt {
+    share = convertToShare(share)
+    const shareX = Buffer.from(share.share_x.toHexString().slice(2), "hex")
+    const shareY = Buffer.from(share.share_y.toHexString().slice(2), "hex")
+
+    const packedData = utils.concat([shareX, shareY])
+    const hash = utils.keccak256(packedData)
+
+    return BigNumber.from(hash)
+}

@@ -14,18 +14,29 @@ import {
 } from "wagmi"
 
 import { BN256ToBinUtil, GenerateRandomBinaryArray, StringTo256Binary, BNToDecimal } from "$u"
+import { useRouter } from "next/router"
+
+import { useAtom } from "jotai"
+import { zkWhisperAccountAddressAtom, zkWhisperAccountPrivKeyAtom, zkWhisperAccountMnemonicAtom } from "../../state/atom"
 
 // ========================================================== deployment details
 import ZKWHISPER_ABI from "../../constants/zkwhisper.json"
 import ZKWHISPER_ADDRESS from '../../constants/addressMappings';
 const zkWhisperInterface = new Interface(ZKWHISPER_ABI)
 
+import { usePrepareSendTransaction, useSendTransaction } from "wagmi"
+
+
 const keccak256 = require("js-sha3").keccak256
 const crypto = require("crypto")
 
 const wc = require("../../circuits/signup_js/witness_calculator")
 
+
+
 const CreateNewWallet = () => {
+    const router = useRouter()
+
     const [mnemonic, setMnemonic] = useState("")
     const [password1, setPassword1] = useState("")
     const [password2, setPassword2] = useState("")
@@ -38,6 +49,12 @@ const CreateNewWallet = () => {
     const [commitmentHash, setCommitmentHash] = useState(null)
     const [idProof, setIdProof] = useState("")
     // const debouncedTokenId = useDebounce(commitmentHash, 500)
+
+    const [zkWhisperAccountAddress, setZkWhisperAccountAddress] = useAtom(
+        zkWhisperAccountAddressAtom
+    )
+    const [walletAddressPrivKey, setWalletAddressPrivKey] = useAtom(zkWhisperAccountPrivKeyAtom)
+    const [walletMnemoic, setWalletMnemoic] = useAtom(zkWhisperAccountMnemonicAtom)
 
     /* 
   ==========================================
@@ -67,6 +84,7 @@ const CreateNewWallet = () => {
         const wallet = ethers.Wallet.createRandom()
         console.log(wallet.mnemonic)
         setMnemonic(wallet.mnemonic.phrase)
+        setWalletMnemoic(wallet.mnemonic.phrase)
     }
 
     const checkPasswordEquality = () => {
@@ -147,6 +165,7 @@ const CreateNewWallet = () => {
         console.log("wallet.address:", wallet.address)
         console.log("wallet.privKey:", wallet.privateKey)
         console.log("wallet.pubKey:", wallet.publicKey)
+        setWalletAddressPrivKey(wallet.privateKey)
         return wallet.address
     }
 
@@ -305,6 +324,7 @@ const CreateNewWallet = () => {
         const _i_proof = {
             menmonic: mnemonic,
             password: password1,
+            walletAddressPrivKey: walletAddressPrivKey,
             nullifier: nullifier,
             nullifierHash: `${nullifierHash}`,
             commitment: commitment,
@@ -332,7 +352,17 @@ const CreateNewWallet = () => {
         a.download = `zkWhisper_identitiy_proof_${commitmentHash}.json` // Change the file name as needed
         a.click()
         URL.revokeObjectURL(url)
+        setZkWhisperAccountAddress(walletAddress)
     }
+
+    //// ============================================================= transfer funds
+    // const [transferEth, setTransferEth] = useState("0.1")
+
+    // const { config: transferEthConf } = usePrepareSendTransaction({
+    //     to: walletAddress ? walletAddress : null,
+    //     value: transferEth? ethers.utils.parseEther(transferEth): undefined,
+    // })
+    // const { sendTransaction } = useSendTransaction(transferEthConf)
 
     return (
         <div className="flex flex-col items-center justify-center py-5">
@@ -364,15 +394,17 @@ const CreateNewWallet = () => {
             {isSuccess && (
                 <div className="flex flex-col items-center justify-center py-5">
                     <div className="flex flex-col items-center justify-center py-5">
-                        <h4 className="text-2xl font-bold mb-10">
+                        {/* <h4 className="text-2xl font-bold mb-10">
                             Metamask Wallet Address: {metamaskWalletAddress}
-                        </h4>
+                        </h4> */}
                         <h2 className="text-4xl font-bold mb-10">Wallet Created!</h2>
                         <p className="text-2xl font-bold mb-10">
                             Please save your mnemonic and password in a safe place.
                         </p>
                         <div className="flex flex-col items-center mt-4">
-                            <p className="font-bold">Wallet Address:</p>
+                            <p className="font-bold">
+                                <strong>Wallet Address:</strong>
+                            </p>
                             <div className="flex items-center mt-4">
                                 <p className="font-mono">{walletAddress}</p>
                                 <button
@@ -382,14 +414,66 @@ const CreateNewWallet = () => {
                                     <FiCopy className="m-2" /> {copied ? "Copied!" : "Copy"}{" "}
                                 </button>
                             </div>
+                            <p className="font-bold">
+                                <strong>Wallet PrivateKey</strong>
+                            </p>
+                            <div className="flex items-center mt-4">
+                                <p className="font-mono">{walletAddressPrivKey}</p>
+                                <button
+                                    onClick={() => copyToClipboard(walletAddressPrivKey)}
+                                    className="flex items-center"
+                                >
+                                    <FiCopy className="m-2" /> {copied ? "Copied!" : "Copy"}{" "}
+                                </button>
+                            </div>
+                            <p className="font-bold">
+                                <strong>Wallet Mnemonic</strong>
+                            </p>
+                            <div className="flex items-center mt-4">
+                                <p className="font-mono">{walletMnemoic}</p>
+                                <button
+                                    onClick={() => copyToClipboard(walletMnemoic)}
+                                    className="flex items-center"
+                                >
+                                    <FiCopy className="m-2" /> {copied ? "Copied!" : "Copy"}{" "}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <p>{`ZKWhisper Wallet Address:  ${walletAddress}`}</p>
                     <button
                         className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
                         onClick={downloadJson}
                     >
                         Download Your Wallet Identity Proof
+                    </button>
+                    {/* <div className="flex items-center justify-center mt-10">
+                        <label htmlFor="transfer" className="text-gray-600">
+                            Enter ETH
+                        </label>
+                        <input
+                            type="number"
+                            value={transferEth}
+                            onChange={(e) => setTransferEth(e.target.value)}
+                            className="border border-gray-300 text-gray-600 font-mono text-sm p-3 m-2 rounded  resize-none"
+                        />
+                        <p><button
+                            className="button rounded-lg font-bold bg-amber-400 border-4 border-black p-2 min-w-[300px] hover:bg-white hover:text-black"
+                            onClick={() => sendTransaction?.()}
+                        >
+                            Transfer ETH to ZKWhisper Wallet
+                        </button></p>
+                        </div> */}
+                    {/* <button
+                        className="button rounded-lg font-bold bg-amber-400 border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                        onClick={() => sendTransaction?.()}
+                    >
+                        Transfer 1 ETH to ZKWhisper Wallet
+                    </button> */}
+                    <button
+                        className="button rounded-lg font-bold bg-black text-white border-4 border-black p-4 my-5 min-w-[300px] hover:bg-white hover:text-black"
+                        onClick={() => router.push("/recovery")}
+                    >
+                        Setup Wallet Recovery
                     </button>
                 </div>
             )}
@@ -450,7 +534,6 @@ const CreateNewWallet = () => {
                     <button
                         className="bg-amber-400  px-4 py-2 mt-10 rounded w-full"
                         onClick={handleSubmit}
-                        // disabled={!write}
                     >
                         Generate Proof
                     </button>
@@ -459,7 +542,7 @@ const CreateNewWallet = () => {
                         onClick={() => write?.()}
                         disabled={!write}
                     >
-                        Call SmartContract
+                        Sign Up
                     </button>
                 </div>
             )}

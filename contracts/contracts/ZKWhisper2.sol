@@ -9,7 +9,7 @@ import "hardhat/console.sol"; //TODO: to be deleted later
 contract ZKWhisper2 is ReentrancyGuard {
     event SignupEvent(uint256 root, uint256[10] hashPairings, uint8[10] hashDirections);
     event LoginEvent(address account, uint256 nullifierHash, bool verifyOK);
-    
+
     event RegisterRecoveryEvent(uint256 root, uint256[10] hashPairings, uint8[10] hashDirections);
     event ExecuteRecoveryEvent(address account, uint256 nullifierHash, bool verifyOK);
 
@@ -59,19 +59,22 @@ contract ZKWhisper2 is ReentrancyGuard {
         84471174696199327694264315103281449774380640817857198224219237805210461810244
     ];
 
-    constructor(
-        address _hasher,
-        address _verifier
-    ){
-        hasher = Hasher(_hasher);
-         verifier = _verifier;
+    address public owner;
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can call this function");
+        _;
     }
 
-    function signupFn(
-        uint256 _commitment
-    ) external nonReentrant returns (uint256 root) {
-    // ) external nonReentrant returns (uint256, uint256[10] memory, uint8[10] memory) {
-        
+    constructor(address _hasher, address _verifier) {
+        hasher = Hasher(_hasher);
+        verifier = _verifier;
+        owner = msg.sender;
+        console.log("==================---> owner = %s", owner);
+    }
+
+    function signupFn(uint256 _commitment) external nonReentrant returns (uint256 root) {
+        // ) external nonReentrant returns (uint256, uint256[10] memory, uint8[10] memory) {
+
         require(!commitmentsUser[_commitment], "existing-commitment");
         require(nextLeafIdxUser < 2 ** treeLevel, "tree-full");
 
@@ -87,14 +90,14 @@ contract ZKWhisper2 is ReentrancyGuard {
         uint256[2] memory ins;
 
         console.log("---> _commitment = %s", _commitment);
-        
-        for(uint8 i = 0; i < treeLevel; i++){
-            if(currentIdx % 2 == 0){
+
+        for (uint8 i = 0; i < treeLevel; i++) {
+            if (currentIdx % 2 == 0) {
                 left = currentHash;
                 right = levelDefaultsUser[i];
                 hashPairings[i] = levelDefaultsUser[i];
                 hashDirections[i] = 0;
-            }else{
+            } else {
                 left = lastLevelHashUser[i];
                 right = currentHash;
                 hashPairings[i] = lastLevelHashUser[i];
@@ -106,7 +109,7 @@ contract ZKWhisper2 is ReentrancyGuard {
             ins[0] = left;
             ins[1] = right;
 
-            (uint256 h) = hasher.MiMC5Sponge{ gas: 150000 }(ins, _commitment);
+            uint256 h = hasher.MiMC5Sponge{gas: 150000}(ins, _commitment);
 
             currentHash = h;
             currentIdx = currentIdx / 2;
@@ -150,7 +153,9 @@ contract ZKWhisper2 is ReentrancyGuard {
 
         uint256 _addr = uint256(uint160(msg.sender));
 
-        (bool verifyOK, ) = verifier.call(abi.encodeCall(IVerifier.verifyProof, (a, b, c, [_root, _nullifierHash, _addr])));
+        (bool verifyOK, ) = verifier.call(
+            abi.encodeCall(IVerifier.verifyProof, (a, b, c, [_root, _nullifierHash, _addr]))
+        );
 
         if (verifyOK) {
             nullifierHashesUser[_nullifierHash] = true;
@@ -159,12 +164,9 @@ contract ZKWhisper2 is ReentrancyGuard {
         emit LoginEvent(msg.sender, _nullifierHash, verifyOK);
     }
 
+    function registerRecoveryFn(uint256 _commitment) external nonReentrant returns (uint256 root) {
+        // ) external nonReentrant returns (uint256, uint256[10] memory, uint8[10] memory) {
 
-    function registerRecoveryFn(
-        uint256 _commitment
-    ) external nonReentrant returns (uint256 root) {
-    // ) external nonReentrant returns (uint256, uint256[10] memory, uint8[10] memory) {
-        
         require(!commitmentsRecovery[_commitment], "existing-commitment");
         require(nextLeafIdxRecovery < 2 ** treeLevel, "tree-full");
 
@@ -180,14 +182,14 @@ contract ZKWhisper2 is ReentrancyGuard {
         uint256[2] memory ins;
 
         console.log("---> _commitment = %s", _commitment);
-        
-        for(uint8 i = 0; i < treeLevel; i++){
-            if(currentIdx % 2 == 0){
+
+        for (uint8 i = 0; i < treeLevel; i++) {
+            if (currentIdx % 2 == 0) {
                 left = currentHash;
                 right = levelDefaultsRegistry[i];
                 hashPairings[i] = levelDefaultsRegistry[i];
                 hashDirections[i] = 0;
-            }else{
+            } else {
                 left = lastLevelHashRecovery[i];
                 right = currentHash;
                 hashPairings[i] = lastLevelHashRecovery[i];
@@ -199,7 +201,7 @@ contract ZKWhisper2 is ReentrancyGuard {
             ins[0] = left;
             ins[1] = right;
 
-            (uint256 h) = hasher.MiMC5Sponge{ gas: 150000 }(ins, _commitment);
+            uint256 h = hasher.MiMC5Sponge{gas: 150000}(ins, _commitment);
 
             currentHash = h;
             currentIdx = currentIdx / 2;
@@ -238,21 +240,33 @@ contract ZKWhisper2 is ReentrancyGuard {
         uint256 _root = input[0];
         uint256 _nullifierHash = input[1];
 
-        // require(!nullifierHashes[_nullifierHash], "nullifier already exists. Try another one.");  // not required as we are not solving double-spend problem
+        require(
+            !nullifierHashesRecovery[_nullifierHash],
+            "A recovery has already been made with this nullifier. Try another one."
+        );
         require(rootsRecovery[_root], "root does not exist");
 
         uint256 _addr = uint256(uint160(msg.sender));
 
-        (bool verifyOK, ) = verifier.call(abi.encodeCall(IVerifier.verifyProof, (a, b, c, [_root, _nullifierHash, _addr])));
+        (bool verifyOK, ) = verifier.call(
+            abi.encodeCall(IVerifier.verifyProof, (a, b, c, [_root, _nullifierHash, _addr]))
+        );
 
-        if (verifyOK) {
-            nullifierHashesRecovery[_nullifierHash] = true;
-        }
-        // require(verifyOK, "invalid proof provided");
+        // if (verifyOK) {
+        //     nullifierHashesRecovery[_nullifierHash] = true;
 
-        //TODO: take to and from addresses as input and transfer assets
+        //     uint256 balance = from.balance;
+        //     require(balance > 0, "Source address has no assets to transfer");
+        //     // Transfer all assets from 'from' to 'to'
+        //     (bool success, bytes memory data) = to.call{value: balance}("");
+            
+        //     // console.log("==================---> data = %s", data);
+        //     console.log("==================---> success = %s", success);
+        //     require(success, "Transfer failed");
+        // }
+        
+        require(verifyOK, "invalid proof provided");
 
         emit ExecuteRecoveryEvent(msg.sender, _nullifierHash, verifyOK);
     }
-
 }
